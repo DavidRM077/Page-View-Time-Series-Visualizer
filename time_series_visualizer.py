@@ -6,7 +6,7 @@ register_matplotlib_converters()
 
 
 # Import data (Make sure to parse dates. Consider setting index column to 'date'.)
-df = pd.read_csv("fcc-forum-pageviews.csv")
+df = pd.read_csv("fcc-forum-pageviews.csv" , parse_dates= ['date'], index_col= 'date')
 
 # Clean data
 df = df[
@@ -18,16 +18,11 @@ df = df[
 def draw_line_plot():
     # Draw line plot
 
-    df["date"] = pd.to_datetime(df["date"])
-    #df.index = pd.to_datetime(df.index)
-
-    df.set_index('date', inplace=True)
-
     fig = plt.figure(figsize=(12,6))
     plt.plot(df["value"], color="red",linewidth = 1)
     plt.title("Daily freeCodeCamp Forum Page Views 5/2016-12/2019")
-    plt.ylabel("page views")
-    plt.xlabel("date")
+    plt.ylabel("Page Views")
+    plt.xlabel("Date")
     
 
     # Save image and return fig (don't change this part)
@@ -35,6 +30,7 @@ def draw_line_plot():
     return fig
 
 def draw_bar_plot():
+
     df["year"] = df.index.year
     df["month"] = df.index.month_name()
 
@@ -46,8 +42,8 @@ def draw_bar_plot():
     ],
     ordered=True
 )
-    agrupados = df.groupby(["year","month"], observed= False).mean()
-    agrupados = agrupados.reset_index()  
+    agrupados = df.groupby(["year","month"], observed= False).mean().reset_index()
+    
    
 
     # Copy and modify data for monthly bar plot
@@ -73,17 +69,21 @@ def draw_box_plot():
     df_box.reset_index(inplace=True)
     df_box['year'] = [d.year for d in df_box.date]
     df_box['month'] = [d.strftime('%b') for d in df_box.date]
+    df_box['month'] = pd.Categorical(df_box['month'], 
+                                 categories=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], 
+                                 ordered=True)
 
     # Draw box plots (using Seaborn)
 
     fig , axes = plt.subplots(nrows=1, ncols=2 ,figsize = (20,6))
 
-    axes[0] = sns.boxplot(x = 'year' , y = 'value', data= df_box , ax=axes[0] , palette= 'Set2')
+    axes[0] = sns.boxplot(x = 'year' , y = 'value', data= df_box , ax=axes[0] , palette= 'Set2' ,   legend = False, orientation="vertical")
     axes[0].set_title('Year-wise Box Plot (Trend)')
     axes[0].set_xlabel('Year')
     axes[0].set_ylabel('Page Views')
 
-    axes[1] = sns.boxplot(x = 'month' , y = 'value', data= df_box , ax=axes[1], palette= 'Set2',)
+    axes[1] = sns.boxplot(x = 'month' , y = 'value', data= df_box , ax=axes[1], palette= 'Set2', legend = False, orientation="vertical")
     axes[1].set_title('Month-wise Box Plot (Seasonality)')
     axes[1].set_xlabel('Month')
     axes[1].set_ylabel('Page Views')
